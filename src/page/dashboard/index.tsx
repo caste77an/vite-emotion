@@ -1,16 +1,11 @@
-import styled from '@emotion/styled'
+import { TableReviews } from "../../components/table"
 
 export const Dashboard = () => {
     return (
-        <StyledP>
+        <div>
             <p>dashboard page</p>
-        </StyledP>
+            <TableReviews />
+        </div>
     )
 }
 
-const StyledP = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-`
