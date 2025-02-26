@@ -1,10 +1,10 @@
-import { TableReviews } from "../../components/table"
+import { TableSort } from "../../components/table"
 
 export const Dashboard = () => {
     return (
         <div>
             <p>dashboard page</p>
-            <TableReviews />
+            <TableSort />
         </div>
     )
 }

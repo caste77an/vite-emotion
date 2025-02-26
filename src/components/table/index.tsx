@@ -1,106 +1,236 @@
-import { Anchor, Group, Progress, Table, Text } from '@mantine/core';
-import classes from './TableReviews.module.css';
+import { useState } from 'react';
+import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from '@tabler/icons-react';
+import {
+    Center,
+    Group,
+    keys,
+    ScrollArea,
+    Table,
+    Text,
+    TextInput,
+    UnstyledButton,
+} from '@mantine/core';
+import classes from './TableSort.module.css';
+
+interface RowData {
+    name: string;
+    email: string;
+    company: string;
+}
+
+interface ThProps {
+    children: React.ReactNode;
+    reversed: boolean;
+    sorted: boolean;
+    onSort: () => void;
+}
+
+function Th({ children, reversed, sorted, onSort }: ThProps) {
+    const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
+    return (
+        <Table.Th className={classes.th}>
+            <UnstyledButton onClick={onSort} className={classes.control}>
+                <Group justify="space-between">
+                    <Text fw={500} fz="sm">
+                        {children}
+                    </Text>
+                    <Center className={classes.icon}>
+                        <Icon size={16} stroke={1.5} />
+                    </Center>
+                </Group>
+            </UnstyledButton>
+        </Table.Th>
+    );
+}
+
+function filterData(data: RowData[], search: string) {
+    const query = search.toLowerCase().trim();
+    return data.filter((item) =>
+        keys(data[0]).some((key) => item[key].toLowerCase().includes(query))
+    );
+}
+
+function sortData(
+    data: RowData[],
+    payload: { sortBy: keyof RowData | null; reversed: boolean; search: string }
+) {
+    const { sortBy } = payload;
+
+    if (!sortBy) {
+        return filterData(data, payload.search);
+    }
+
+    return filterData(
+        [...data].sort((a, b) => {
+            if (payload.reversed) {
+                return b[sortBy].localeCompare(a[sortBy]);
+            }
+
+            return a[sortBy].localeCompare(b[sortBy]);
+        }),
+        payload.search
+    );
+}
 
 const data = [
     {
-        title: 'Foundation',
-        author: 'Isaac Asimov',
-        year: 1951,
-        reviews: { positive: 2223, negative: 259 },
+        name: 'Athena Weissnat',
+        company: 'Little - Rippin',
+        email: 'Elouise.Prohaska@yahoo.com',
     },
     {
-        title: 'Frankenstein',
-        author: 'Mary Shelley',
-        year: 1818,
-        reviews: { positive: 5677, negative: 1265 },
+        name: 'Deangelo Runolfsson',
+        company: 'Greenfelder - Krajcik',
+        email: 'Kadin_Trantow87@yahoo.com',
     },
     {
-        title: 'Solaris',
-        author: 'Stanislaw Lem',
-        year: 1961,
-        reviews: { positive: 3487, negative: 1845 },
+        name: 'Danny Carter',
+        company: 'Kohler and Sons',
+        email: 'Marina3@hotmail.com',
     },
     {
-        title: 'Dune',
-        author: 'Frank Herbert',
-        year: 1965,
-        reviews: { positive: 8576, negative: 663 },
+        name: 'Trace Tremblay PhD',
+        company: 'Crona, Aufderhar and Senger',
+        email: 'Antonina.Pouros@yahoo.com',
     },
     {
-        title: 'The Left Hand of Darkness',
-        author: 'Ursula K. Le Guin',
-        year: 1969,
-        reviews: { positive: 6631, negative: 993 },
+        name: 'Derek Dibbert',
+        company: 'Gottlieb LLC',
+        email: 'Abagail29@hotmail.com',
     },
     {
-        title: 'A Scanner Darkly',
-        author: 'Philip K Dick',
-        year: 1977,
-        reviews: { positive: 8124, negative: 1847 },
+        name: 'Viola Bernhard',
+        company: 'Funk, Rohan and Kreiger',
+        email: 'Jamie23@hotmail.com',
+    },
+    {
+        name: 'Austin Jacobi',
+        company: 'Botsford - Corwin',
+        email: 'Genesis42@yahoo.com',
+    },
+    {
+        name: 'Hershel Mosciski',
+        company: 'Okuneva, Farrell and Kilback',
+        email: 'Idella.Stehr28@yahoo.com',
+    },
+    {
+        name: 'Mylene Ebert',
+        company: 'Kirlin and Sons',
+        email: 'Hildegard17@hotmail.com',
+    },
+    {
+        name: 'Lou Trantow',
+        company: 'Parisian - Lemke',
+        email: 'Hillard.Barrows1@hotmail.com',
+    },
+    {
+        name: 'Dariana Weimann',
+        company: 'Schowalter - Donnelly',
+        email: 'Colleen80@gmail.com',
+    },
+    {
+        name: 'Dr. Christy Herman',
+        company: 'VonRueden - Labadie',
+        email: 'Lilyan98@gmail.com',
+    },
+    {
+        name: 'Katelin Schuster',
+        company: 'Jacobson - Smitham',
+        email: 'Erich_Brekke76@gmail.com',
+    },
+    {
+        name: 'Melyna Macejkovic',
+        company: 'Schuster LLC',
+        email: 'Kylee4@yahoo.com',
+    },
+    {
+        name: 'Pinkie Rice',
+        company: 'Wolf, Trantow and Zulauf',
+        email: 'Fiona.Kutch@hotmail.com',
+    },
+    {
+        name: 'Brain Kreiger',
+        company: 'Lueilwitz Group',
+        email: 'Rico98@hotmail.com',
     },
 ];
 
-export function TableReviews() {
-    const rows = data.map((row) => {
-        const totalReviews = row.reviews.negative + row.reviews.positive;
-        const positiveReviews = (row.reviews.positive / totalReviews) * 100;
-        const negativeReviews = (row.reviews.negative / totalReviews) * 100;
+export function TableSort() {
+    const [search, setSearch] = useState('');
+    const [sortedData, setSortedData] = useState(data);
+    const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
+    const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
-        return (
-            <Table.Tr key={row.title}>
-                <Table.Td>
-                    <Anchor component="button" fz="sm">
-                        {row.title}
-                    </Anchor>
-                </Table.Td>
-                <Table.Td>{row.year}</Table.Td>
-                <Table.Td>
-                    <Anchor component="button" fz="sm">
-                        {row.author}
-                    </Anchor>
-                </Table.Td>
-                <Table.Td>{Intl.NumberFormat().format(totalReviews)}</Table.Td>
-                <Table.Td>
-                    <Group justify="space-between">
-                        <Text fz="xs" c="teal" fw={700}>
-                            {positiveReviews.toFixed(0)}%
-                        </Text>
-                        <Text fz="xs" c="red" fw={700}>
-                            {negativeReviews.toFixed(0)}%
-                        </Text>
-                    </Group>
-                    <Progress.Root>
-                        <Progress.Section
-                            className={classes.progressSection}
-                            value={positiveReviews}
-                            color="teal"
-                        />
+    const setSorting = (field: keyof RowData) => {
+        const reversed = field === sortBy ? !reverseSortDirection : false;
+        setReverseSortDirection(reversed);
+        setSortBy(field);
+        setSortedData(sortData(data, { sortBy: field, reversed, search }));
+    };
 
-                        <Progress.Section
-                            className={classes.progressSection}
-                            value={negativeReviews}
-                            color="red"
-                        />
-                    </Progress.Root>
-                </Table.Td>
-            </Table.Tr>
-        );
-    });
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { value } = event.currentTarget;
+        setSearch(value);
+        setSortedData(sortData(data, { sortBy, reversed: reverseSortDirection, search: value }));
+    };
+
+    const rows = sortedData.map((row) => (
+        <Table.Tr key={row.name}>
+            <Table.Td>{row.name}</Table.Td>
+            <Table.Td>{row.email}</Table.Td>
+            <Table.Td>{row.company}</Table.Td>
+        </Table.Tr>
+    ));
 
     return (
-        <Table.ScrollContainer minWidth={800}>
-            <Table verticalSpacing="xs">
-                <Table.Thead>
+        <ScrollArea>
+            <TextInput
+                placeholder="Search by any field"
+                mb="md"
+                leftSection={<IconSearch size={16} stroke={1.5} />}
+                value={search}
+                onChange={handleSearchChange}
+            />
+            <Table horizontalSpacing="md" verticalSpacing="xs" miw={700} layout="fixed">
+                <Table.Tbody>
                     <Table.Tr>
-                        <Table.Th>Book title</Table.Th>
-                        <Table.Th>Year</Table.Th>
-                        <Table.Th>Author</Table.Th>
-                        <Table.Th>Reviews</Table.Th>
-                        <Table.Th>Reviews distribution</Table.Th>
+                        <Th
+                            sorted={sortBy === 'name'}
+                            reversed={reverseSortDirection}
+                            onSort={() => setSorting('name')}
+                        >
+                            Name
+                        </Th>
+                        <Th
+                            sorted={sortBy === 'email'}
+                            reversed={reverseSortDirection}
+                            onSort={() => setSorting('email')}
+                        >
+                            Email
+                        </Th>
+                        <Th
+                            sorted={sortBy === 'company'}
+                            reversed={reverseSortDirection}
+                            onSort={() => setSorting('company')}
+                        >
+                            Company
+                        </Th>
                     </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>{rows}</Table.Tbody>
+                </Table.Tbody>
+                <Table.Tbody>
+                    {rows.length > 0 ? (
+                        rows
+                    ) : (
+                        <Table.Tr>
+                            <Table.Td colSpan={Object.keys(data[0]).length}>
+                                <Text fw={500} ta="center">
+                                    Nothing found
+                                </Text>
+                            </Table.Td>
+                        </Table.Tr>
+                    )}
+                </Table.Tbody>
             </Table>
-        </Table.ScrollContainer>
+        </ScrollArea>
     );
 }
