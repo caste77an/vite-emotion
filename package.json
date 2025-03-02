@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
+    "notion-client": "^7.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
